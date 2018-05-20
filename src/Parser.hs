@@ -23,7 +23,7 @@ m -# n = m # n >-> snd
 m #- n = m # n >-> fst
 
 spaces :: Parser String
-spaces =  char ? isSpace # spaces >-> cons
+spaces =  char ? isSpace # spaces >-> cons ! return []
 
 token :: Parser a -> Parser a
 token m = m #- spaces
@@ -35,7 +35,7 @@ word :: Parser String
 word = token (letter # iter letter >-> cons)
 
 chars :: Int -> Parser String
-chars 0 = fail
+chars 0 = return []
 chars n = char # chars (n-1) >-> cons
 
 accept :: String -> Parser String

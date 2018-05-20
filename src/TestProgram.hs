@@ -3,7 +3,7 @@ module TestProgram where
 
 import Program
 
-p, p1, p2, p3 :: Program.T
+p, p1, p2, p3, p5, p6 :: Program.T
 p = fromString  ("\
 \read k;\
 \read n;\
@@ -16,6 +16,22 @@ p = fromString  ("\
 \      write m;\
 \    m := m + 1;\
 \  end")
+
+p5 = fromString  ("\
+\begin\
+\  if m - m/k*k then\
+\    skip;\
+\  else\
+\    write m;\
+\  m := m + 1;\
+\end")
+
+p6 = fromString  ("\
+\if m - m/k*k then\
+\  skip;\
+\else\
+\  write m;\
+\m := m + 1;")
 
 p1 = fromString  ("\
 \read n;\
@@ -77,7 +93,7 @@ s4 = "\
 \    a := a-1;\
 \  end\
 \write a;"
-
+p4 :: Program.T
 p4 = fromString s4
 
 rp4 = Program.exec p4 [4,4]
