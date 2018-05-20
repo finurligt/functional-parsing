@@ -56,8 +56,11 @@ factor = num !
          lit '(' -# expr #- lit ')' !
          err "illegal factor"
 
+expo' e = powOp # factor >-> bldOp e #> expo' ! return e
+expo = factor #> expo'
+
 term' e = mulOp # factor >-> bldOp e #> term' ! return e
-term = factor #> term'
+term = expo #> term'
 
 expr' e = addOp # term >-> bldOp e #> expr' ! return e
 expr = term #> expr'
@@ -75,16 +78,14 @@ shw prec (Pow t u) = parens (prec>7) (shw 7 t ++ "^" ++ shw 8 u)
 
 value :: Expr -> Dictionary.T String Integer -> Integer
 value (Num n) _ = n
-value (Var s) env = case Dictionary.lookup s env of
-  Nothing -> error $ "Variable "++s++" not found"
-  Just i -> i
-value (Mul e1 e2) env = (value e1 env) * (value e2 env)
-value (Div e1 e2) env = case (value e2 env) of
+value (Var s) env = fromMaybe (error $ "Variable "++s++" not found") (Dictionary.lookup s env)
+value (Mul e1 e2) env = value e1 env * value e2 env
+value (Div e1 e2) env = case value e2 env of
   0 -> error "division by zero"
-  denom -> (value e1 env) `div` denom
-value (Add e1 e2) env = (value e1 env) + (value e2 env)
-value (Sub e1 e2) env = (value e1 env) - (value e2 env)
-value (Pow e1 e2) env = (value e1 env) ^ (value e2 env)
+  denom -> value e1 en `div` denom
+value (Add e1 e2) env = value e1 env + value e2 env
+value (Sub e1 e2) env = value e1 env - value e2 env
+value (Pow e1 e2) env = value e1 env ^ value e2 env
 
 instance Parse Expr where
     parse = expr

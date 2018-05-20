@@ -3,13 +3,15 @@ import Parser hiding (T)
 import qualified Statement
 import qualified Dictionary
 import Prelude hiding (return, fail)
+import Data.List
+import Data.List.Split
 newtype T = Program [Statement.T] -- to be defined
 instance Parse T where
-  parse = iter Statement.parse #> \stmts -> return (Program stmts)
+  parse = (iter Statement.parse >-> Program) . filterComments
   toString (Program stmts) = concatMap ((++ "\n") . Statement.toString) stmts
 
 exec :: T -> [Integer] -> [Integer]
-exec (Program stmts) input = Statement.exec stmts Dictionary.empty input
+exec (Program stmts) = Statement.exec stmts Dictionary.empty
 
 {-
 exec :: T -> IO ()
@@ -29,3 +31,6 @@ printList = putStrLn . unlines . map show
 
 exec' :: [Statement.T] -> IO [Integer] -> IO [Integer]
 exec' stmts = fmap (Statement.exec stmts Dictionary.empty)-}
+
+filterComments :: String -> String
+filterComments = unlines . head . transpose . fmap (splitOn "--") . lines
