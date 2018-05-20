@@ -9,7 +9,7 @@ data Statement =
     Assignment String Expr.T |
     If Expr.T Statement Statement |
     Skip | Begin [Statement] | While Expr.T Statement
-    | Read String | Write Expr.T
+    | Read String | Write Expr.T | Comment
     deriving Show
 
 assignment = word #- accept ":=" # Expr.parse #- require ";" >-> buildAss
@@ -27,6 +27,8 @@ read' = token (accept "read") -# word #- token (require ";") >-> buildRead
 buildRead v = Read v
 write = token (accept "write") -# Expr.parse #- token (require ";") >-> buildWrite
 buildWrite e = Write e
+comment = accept "--" >-> buildComment --TODO lägga till parser för resten av raden
+buildComment e = Comment
 
 
 
